@@ -73,9 +73,9 @@ def create_site_config():
     # Limpiar valores None
     config = {k: v for k, v in config.items() if v is not None}
     
-    # Crear directorio sites si no existe (estructura bench)
+    # Crear directorio sites si no existe
     site_name = os.environ.get("FRAPPE_SITE_NAME", "vilerp")
-    sites_dir = f"frappe-bench/sites/{site_name}"
+    sites_dir = f"sites/{site_name}"
     os.makedirs(sites_dir, exist_ok=True)
     
     # Escribir configuración
@@ -114,9 +114,9 @@ def create_common_site_config():
         "app_title": "VilERP - Enterprise Resource Planning"
     }
     
-    os.makedirs("frappe-bench/sites", exist_ok=True)
+    os.makedirs("sites", exist_ok=True)
     
-    with open("frappe-bench/sites/common_site_config.json", "w") as f:
+    with open("sites/common_site_config.json", "w") as f:
         json.dump(config, f, indent=2)
     
     print("✅ common_site_config.json creado")
