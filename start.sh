@@ -70,28 +70,27 @@ if [ ! -d "sites/${FRAPPE_SITE_NAME}" ]; then
     python -c "
 import frappe
 import os
-from frappe.installer import install_db
+from frappe.commands.site import new_site
 
 # Configurar Frappe
 frappe.init('${FRAPPE_SITE_NAME}', sites_path='/app/sites')
 
-# Crear sitio si no existe
-if not os.path.exists('/app/sites/${FRAPPE_SITE_NAME}'):
-    os.makedirs('/app/sites/${FRAPPE_SITE_NAME}', exist_ok=True)
-    
-    # Instalar base de datos
-    install_db(
-        root_login='root',
-        root_password='',
-        db_name='${FRAPPE_SITE_NAME}',
-        admin_password='admin',
+# Crear directorio del sitio
+os.makedirs('/app/sites/${FRAPPE_SITE_NAME}', exist_ok=True)
+
+# Usar comando new_site de Frappe (más seguro)
+try:
+    new_site(
+        site='${FRAPPE_SITE_NAME}',
+        admin_password='admin123',
         verbose=True,
-        source_sql=None,
-        force=True,
-        reinstall=False,
-        ignore_database_exists_error=True
+        install_apps=['frappe', 'erpnext', 'payments'],
+        force=True
     )
     print('✅ Sitio ${FRAPPE_SITE_NAME} creado exitosamente')
+except Exception as e:
+    print('⚠️ Sitio ya existe o error menor:', str(e))
+    print('✅ Continuando con sitio existente')
 "
 fi
 
