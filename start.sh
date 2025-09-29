@@ -3,6 +3,15 @@ set -e
 
 echo "🚀 Iniciando VilERP..."
 
+# Función para manejar errores
+handle_error() {
+    echo "❌ Error en línea $1: $2"
+    exit 1
+}
+
+# Configurar trap para errores
+trap 'handle_error $LINENO "$BASH_COMMAND"' ERR
+
 # 1. Configurar sitio (aquí SÍ están las variables de entorno)
 echo "⚙️ Configurando sitio..."
 python setup_production.py
@@ -27,25 +36,53 @@ echo "frappe
 erpnext
 payments" > sites/apps.txt
 
-# 5. Usar método más directo - servidor de desarrollo de Frappe
-echo "🌐 Iniciando servidor Frappe (modo desarrollo para Railway)..."
-cd apps/frappe
+# 5. Crear directorios necesarios para Frappe
+echo "📁 Creando directorios necesarios..."
+mkdir -p logs apps/logs sites/logs sites/assets public/files
+
+# 6. Verificar que las apps se instalaron correctamente
+echo "🔍 Verificando instalación de apps..."
+if [ ! -f "apps/frappe/frappe/__init__.py" ]; then
+    echo "❌ Error: Frappe no se instaló correctamente"
+    exit 1
+fi
+
+# 7. Configurar variables de entorno
+echo "🌐 Iniciando servidor Frappe..."
 export PYTHONPATH="/app:/app/apps/frappe:/app/apps/erpnext:/app/apps/payments"
 export FRAPPE_SITE_NAME=${FRAPPE_SITE_NAME:-vilerp}
+cd /app
 
-# Iniciar con el servidor interno de Frappe
+# 8. Iniciar servidor Frappe con manejo de errores
 exec python -c "
-import frappe
+import sys
 import os
-from werkzeug.serving import run_simple
+import traceback
 
-# Configurar Frappe
-frappe.init('$FRAPPE_SITE_NAME', sites_path='/app/sites')
-frappe.connect()
-
-# Crear aplicación WSGI
-from frappe.app import application
-
-# Ejecutar servidor
-run_simple('0.0.0.0', int(os.environ.get('PORT', 8000)), application, use_reloader=False, use_debugger=False, threaded=True)
+try:
+    # Agregar paths necesarios
+    sys.path.insert(0, '/app/apps/frappe')
+    sys.path.insert(0, '/app/apps/erpnext')
+    sys.path.insert(0, '/app/apps/payments')
+    
+    import frappe
+    from werkzeug.serving import run_simple
+    
+    print('🔧 Configurando Frappe...')
+    site_name = os.environ.get('FRAPPE_SITE_NAME', 'vilerp')
+    frappe.init(site_name, sites_path='/app/sites')
+    frappe.connect()
+    
+    print('📦 Importando aplicación WSGI...')
+    from frappe.app import application
+    
+    print('🌐 Iniciando servidor en puerto', os.environ.get('PORT', 8000))
+    port = int(os.environ.get('PORT', 8000))
+    run_simple('0.0.0.0', port, application, 
+               use_reloader=False, use_debugger=False, threaded=True)
+               
+except Exception as e:
+    print('❌ Error crítico:', str(e))
+    traceback.print_exc()
+    sys.exit(1)
 "
