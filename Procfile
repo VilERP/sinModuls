@@ -1,7 +1,7 @@
 # Procfile para VilERP - Railway/Heroku deployment
 # Frappe/ERPNext Multi-Process Configuration
 
-# Web Server - Sirve la aplicación VilERP principal
+# Web Server - Sirve la aplicacion VilERP principal
 web: ./start.sh
 
 # Background Worker - Procesa trabajos en segundo plano
