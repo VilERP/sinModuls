@@ -2,7 +2,7 @@
 # Frappe/ERPNext Multi-Process Configuration
 
 # Web Server - Sirve la aplicacion VilERP principal
-web: ./start.sh
+web: bash start.sh
 
 # Background Worker - Procesa trabajos en segundo plano
 worker: bench worker --queue default,short,long
