@@ -47,6 +47,9 @@ payments" > sites/apps.txt
 # 6. Crear directorios necesarios para Frappe
 echo "📁 Creando directorios necesarios..."
 mkdir -p /logs /app/logs apps/logs sites/logs sites/assets public/files
+# Crear directorio de logs específico del sitio
+mkdir -p /app/${FRAPPE_SITE_NAME:-vilerp}/logs
+mkdir -p sites/${FRAPPE_SITE_NAME:-vilerp}/logs
 
 # 7. Verificar que las apps se instalaron correctamente
 echo "🔍 Verificando instalación de apps..."
