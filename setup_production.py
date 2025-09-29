@@ -39,7 +39,7 @@ def create_site_config():
     
     # Configuración del sitio
     config = {
-        "db_type": "mysql",
+        "db_type": "mariadb",
         "db_host": db_host,
         "db_port": int(db_port),
         "db_name": db_name,
