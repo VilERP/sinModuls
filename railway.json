@@ -1,0 +1,41 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "python setup_production.py && pip install -e apps/frappe && pip install -e apps/erpnext && pip install -e apps/payments && bench migrate"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "startCommand": "bench serve --port $PORT --noreload --nothreading",
+    "healthcheckPath": "/api/method/ping",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "FRAPPE_SITE_NAME": "vilerp",
+        "DEVELOPER_MODE": "0",
+        "AUTO_MIGRATE": "1",
+        "BACKGROUND_WORKERS": "1",
+        "GUNICORN_WORKERS": "2",
+        "DISABLE_WEBSITE_CACHE": "1",
+        "HIDE_FOOTER": "1",
+        "APP_NAME": "VilERP",
+        "APP_TITLE": "VilERP - Enterprise Resource Planning"
+      }
+    },
+    "development": {
+      "variables": {
+        "FRAPPE_SITE_NAME": "vilerp-dev",
+        "DEVELOPER_MODE": "1",
+        "AUTO_MIGRATE": "1",
+        "BACKGROUND_WORKERS": "1",
+        "GUNICORN_WORKERS": "1",
+        "APP_NAME": "VilERP",
+        "APP_TITLE": "VilERP - Development"
+      }
+    }
+  }
+}

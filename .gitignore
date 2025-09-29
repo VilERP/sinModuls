@@ -1,0 +1,120 @@
+# VilERP .gitignore para Deploy
+# Frappe/ERPNext deployment configuration
+
+# Configuraciones locales - NO incluir en repo
+sites/*/site_config.json
+sites/common_site_config.json
+sites/currentsite.txt
+sites/apps.txt
+
+# Logs y archivos temporales
+logs/
+*.log
+*.error.log
+*.access.log
+
+# Archivos de base de datos local
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de configuración sensibles
+config/
+.bench
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Archivos del sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archivos de backup
+*.bak
+*.backup
+*.sql
+*.gz
+
+# Archivos de uploads y media
+sites/*/public/files/*
+sites/*/private/files/*
+sites/*/private/backups/*
+
+# SSL Certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
+# IDE
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# OS generated files
+.directory
+.fuse_hidden*
+.nfs*
+
+# Frappe específicos
+sites/*/locks/*
+sites/*/task-logs/*
+sites/error.log
+
+# VilERP específicos
+sites/vilerp/locks/*
+sites/vilerp-dev/locks/*

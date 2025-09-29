@@ -1,0 +1,14 @@
+[submodule "apps/frappe"]
+	path = apps/frappe
+	url = https://github.com/VilERP/frappe.git
+	branch = develop
+
+[submodule "apps/erpnext"]
+	path = apps/erpnext
+	url = https://github.com/VilERP/erpnext.git
+	branch = develop
+
+[submodule "apps/payments"]
+	path = apps/payments
+	url = https://github.com/VilERP/payments.git
+	branch = develop
