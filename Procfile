@@ -1,8 +1,8 @@
 # Procfile para VilERP - Railway/Heroku deployment
 # Frappe/ERPNext Multi-Process Configuration
 
-# Web Server - Sirve la aplicaciÃ³n VilERP principal
-web: python setup_production.py && bench serve --port $PORT --noreload --nothreading
+# Web Server - Sirve la aplicación VilERP principal
+web: ./start.sh
 
 # Background Worker - Procesa trabajos en segundo plano
 worker: bench worker --queue default,short,long
