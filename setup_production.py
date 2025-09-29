@@ -18,12 +18,12 @@ def create_site_config():
     
     print("🚀 Configurando sitio VilERP para producción...")
     
-    # Obtener variables de entorno (Railway/Render las proporciona automáticamente)
-    db_host = os.environ.get("FRAPPE_DB_HOST") or os.environ.get("MYSQL_HOST") or os.environ.get("DATABASE_HOST")
-    db_port = os.environ.get("FRAPPE_DB_PORT") or os.environ.get("MYSQL_PORT") or os.environ.get("DATABASE_PORT", "3306")
-    db_name = os.environ.get("FRAPPE_DB_NAME") or os.environ.get("MYSQL_DATABASE") or os.environ.get("DATABASE_NAME")
-    db_user = os.environ.get("FRAPPE_DB_USER") or os.environ.get("MYSQL_USER") or os.environ.get("DATABASE_USER")
-    db_password = os.environ.get("FRAPPE_DB_PASSWORD") or os.environ.get("MYSQL_PASSWORD") or os.environ.get("DATABASE_PASSWORD")
+    # Obtener variables de entorno (Railway proporciona estas variables específicas)
+    db_host = os.environ.get("FRAPPE_DB_HOST") or os.environ.get("MYSQLHOST") or os.environ.get("MYSQL_HOST") or os.environ.get("DATABASE_HOST")
+    db_port = os.environ.get("FRAPPE_DB_PORT") or os.environ.get("MYSQLPORT") or os.environ.get("MYSQL_PORT") or os.environ.get("DATABASE_PORT", "3306")
+    db_name = os.environ.get("FRAPPE_DB_NAME") or os.environ.get("MYSQLDATABASE") or os.environ.get("MYSQL_DATABASE") or os.environ.get("DATABASE_NAME")
+    db_user = os.environ.get("FRAPPE_DB_USER") or os.environ.get("MYSQLUSER") or os.environ.get("MYSQL_USER") or os.environ.get("DATABASE_USER")
+    db_password = os.environ.get("FRAPPE_DB_PASSWORD") or os.environ.get("MYSQLPASSWORD") or os.environ.get("MYSQL_PASSWORD") or os.environ.get("DATABASE_PASSWORD")
     
     # Redis URLs (Railway/Render proporcionan automáticamente)
     redis_cache = os.environ.get("FRAPPE_REDIS_CACHE") or os.environ.get("REDIS_URL") or "redis://localhost:6379"
