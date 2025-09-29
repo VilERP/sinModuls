@@ -59,12 +59,44 @@ if [ ! -f "apps/frappe/frappe/__init__.py" ]; then
 fi
 
 # 8. Configurar variables de entorno
-echo "🌐 Iniciando servidor Frappe..."
+echo "🌐 Configurando Frappe..."
 export PYTHONPATH="/app:/app/apps/frappe:/app/apps/erpnext:/app/apps/payments"
 export FRAPPE_SITE_NAME=${FRAPPE_SITE_NAME:-vilerp}
 cd /app
 
-# 9. Iniciar servidor Frappe con manejo de errores
+# 9. Crear sitio inicial si no existe
+if [ ! -d "sites/${FRAPPE_SITE_NAME}" ]; then
+    echo "🏗️ Creando sitio inicial ${FRAPPE_SITE_NAME}..."
+    python -c "
+import frappe
+import os
+from frappe.installer import install_db
+
+# Configurar Frappe
+frappe.init('${FRAPPE_SITE_NAME}', sites_path='/app/sites')
+
+# Crear sitio si no existe
+if not os.path.exists('/app/sites/${FRAPPE_SITE_NAME}'):
+    os.makedirs('/app/sites/${FRAPPE_SITE_NAME}', exist_ok=True)
+    
+    # Instalar base de datos
+    install_db(
+        root_login='root',
+        root_password='',
+        db_name='${FRAPPE_SITE_NAME}',
+        admin_password='admin',
+        verbose=True,
+        source_sql=None,
+        force=True,
+        reinstall=False,
+        ignore_database_exists_error=True
+    )
+    print('✅ Sitio ${FRAPPE_SITE_NAME} creado exitosamente')
+"
+fi
+
+# 10. Iniciar servidor Frappe con manejo de errores
+echo "🚀 Iniciando servidor Frappe..."
 exec python -c "
 import sys
 import os
