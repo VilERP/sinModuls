@@ -30,11 +30,28 @@ def create_site_config():
     redis_queue = os.environ.get("FRAPPE_REDIS_QUEUE") or os.environ.get("REDIS_URL") or "redis://localhost:6379"
     redis_socketio = os.environ.get("FRAPPE_REDIS_SOCKETIO") or os.environ.get("REDIS_URL") or "redis://localhost:6379"
     
+    # Debug: Mostrar variables disponibles
+    print("🔍 Variables de entorno disponibles:")
+    for key in sorted(os.environ.keys()):
+        if any(term in key.upper() for term in ['MYSQL', 'DB', 'DATABASE', 'REDIS']):
+            value = os.environ[key]
+            # Ocultar passwords
+            if 'PASSWORD' in key.upper() or 'PASS' in key.upper():
+                value = '*' * len(value) if value else 'None'
+            print(f"  {key} = {value}")
+    
     # Validar variables críticas
     if not all([db_host, db_name, db_user, db_password]):
         print("❌ Error: Variables de base de datos no configuradas")
         print("Requeridas: DB_HOST, DB_NAME, DB_USER, DB_PASSWORD")
-        print("Railway/Render deberían proporcionar estas automáticamente")
+        print("🔧 SOLUCIÓN: En Railway Dashboard:")
+        print("   1. Ve a tu proyecto → Variables")
+        print("   2. Agrega las variables de MySQL manualmente:")
+        print("      - MYSQL_HOST=<tu-mysql-host>")
+        print("      - MYSQL_DATABASE=<tu-database-name>") 
+        print("      - MYSQL_USER=<tu-mysql-user>")
+        print("      - MYSQL_PASSWORD=<tu-mysql-password>")
+        print("   3. También agrega REDIS_URL=<tu-redis-url>")
         sys.exit(1)
     
     # Configuración del sitio
@@ -111,7 +128,11 @@ def create_common_site_config():
         
         # VilERP branding
         "app_name": "VilERP",
-        "app_title": "VilERP - Enterprise Resource Planning"
+        "app_title": "VilERP - Enterprise Resource Planning",
+        
+        # Configuración de logs para Railway
+        "log_file": "/app/logs/frappe.log",
+        "logging": 1
     }
     
     os.makedirs("sites", exist_ok=True)
