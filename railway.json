@@ -6,7 +6,7 @@
   },
   "deploy": {
     "numReplicas": 1,
-    "startCommand": "./start.sh",
+    "startCommand": "bash start.sh",
     "healthcheckPath": "/api/method/ping",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
