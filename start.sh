@@ -89,49 +89,57 @@ export DB_PASSWORD="${MYSQLPASSWORD}"
 
 echo "🔧 Instalando sitio ${FRAPPE_SITE_NAME} usando bench..."
 
-# Instalar sitio usando frappe directamente (sin bench)
+# Crear sitio manualmente sin frappe.init
 python -c "
 import os
 import sys
+import json
 sys.path.insert(0, '/app/apps/frappe')
-
-import frappe
-from frappe.installer import install_db
-
-# Configurar frappe para crear sitio
-frappe.init()
 
 site = '${FRAPPE_SITE_NAME}'
 admin_password = 'admin123'
 
-print('🔧 Creando base de datos para sitio:', site)
+print('🔧 Creando sitio manualmente:', site)
 
+# Crear estructura básica del sitio
+site_path = f'sites/{site}'
+os.makedirs(site_path, exist_ok=True)
+
+# Crear site_config.json básico
+site_config = {
+    'db_name': site,
+    'db_type': 'mariadb',
+    'db_host': os.environ.get('MYSQLHOST'),
+    'db_port': int(os.environ.get('MYSQLPORT', 3306)),
+    'db_user': os.environ.get('MYSQLUSER'),
+    'db_password': os.environ.get('MYSQLPASSWORD'),
+    'admin_password': admin_password,
+    'encryption_key': os.urandom(32).hex()
+}
+
+with open(f'{site_path}/site_config.json', 'w') as f:
+    json.dump(site_config, f, indent=2)
+
+print('✅ Sitio configurado manualmente')
+
+# Ahora intentar instalación con frappe
 try:
-    # Crear sitio con frappe installer
+    import frappe
+    frappe.init(site, sites_path='/app/sites')
+    frappe.connect()
+    
+    from frappe.installer import install_db
     install_db(
         root_login=os.environ.get('MYSQLUSER'),
         root_password=os.environ.get('MYSQLPASSWORD'),
         db_name=site,
         admin_password=admin_password,
-        verbose=True,
-        source_sql=None,
-        force=True
+        verbose=True
     )
-    print('✅ Sitio creado exitosamente')
-    
-    # Instalar apps
-    frappe.connect(site=site)
-    frappe.local.site = site
-    
-    from frappe.installer import install_app
-    install_app('erpnext', verbose=True)
-    install_app('payments', verbose=True)
-    
-    print('✅ Apps instaladas exitosamente')
+    print('✅ Base de datos instalada')
     
 except Exception as e:
-    print('⚠️ Error en instalación:', str(e))
-    print('✅ Continuando con sitio básico...')
+    print('⚠️ Error en instalación DB:', str(e))
 "
 
 # 10. Iniciar servidor Frappe con manejo de errores
