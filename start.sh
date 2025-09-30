@@ -65,6 +65,9 @@ export FRAPPE_SITE_NAME=${FRAPPE_SITE_NAME:-vilerp}
 cd /app
 
 # 9. Crear sitio inicial si no existe
+echo "🔍 Verificando si existe sitio sites/${FRAPPE_SITE_NAME}..."
+ls -la sites/ || echo "Directorio sites no existe aún"
+
 if [ ! -d "sites/${FRAPPE_SITE_NAME}" ]; then
     echo "🏗️ Creando sitio inicial ${FRAPPE_SITE_NAME}..."
     python -c "
@@ -92,6 +95,8 @@ except Exception as e:
     print('⚠️ Sitio ya existe o error menor:', str(e))
     print('✅ Continuando con sitio existente')
 "
+else
+    echo "✅ Sitio ${FRAPPE_SITE_NAME} ya existe"
 fi
 
 # 10. Iniciar servidor Frappe con manejo de errores
