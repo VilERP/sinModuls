@@ -130,9 +130,10 @@ def create_common_site_config():
         "app_name": "VilERP",
         "app_title": "VilERP - Enterprise Resource Planning",
         
-        # Configuración de logs para Railway
+        # Configuración de logs para Railway (múltiples rutas)
         "log_file": "/app/logs/frappe.log",
-        "logging": 1
+        "logging": 1,
+        "log_level": "INFO"
     }
     
     os.makedirs("sites", exist_ok=True)

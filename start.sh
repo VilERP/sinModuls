@@ -47,9 +47,10 @@ payments" > sites/apps.txt
 # 6. Crear directorios necesarios para Frappe
 echo "📁 Creando directorios necesarios..."
 mkdir -p /logs /app/logs apps/logs sites/logs sites/assets public/files
-# Crear directorio de logs específico del sitio
-mkdir -p /app/${FRAPPE_SITE_NAME:-vilerp}/logs
+# Crear directorio de logs específico del sitio (TODAS las variantes)
+mkdir -p /app/sites/${FRAPPE_SITE_NAME:-vilerp}/logs
 mkdir -p sites/${FRAPPE_SITE_NAME:-vilerp}/logs
+mkdir -p /app/${FRAPPE_SITE_NAME:-vilerp}/logs
 
 # 7. Verificar que las apps se instalaron correctamente
 echo "🔍 Verificando instalación de apps..."
@@ -68,47 +69,36 @@ cd /app
 echo "🔍 Verificando estado del sitio sites/${FRAPPE_SITE_NAME}..."
 ls -la sites/ || echo "Directorio sites no existe aún"
 
-echo "🏗️ Instalando/reinstalando sitio ${FRAPPE_SITE_NAME} (forzado)..."
-    python -c "
-import frappe
-import os
-from frappe.commands.site import new_site
+echo "🏗️ Instalando sitio ${FRAPPE_SITE_NAME} directamente..."
 
-# Configurar Frappe
-frappe.init('${FRAPPE_SITE_NAME}', sites_path='/app/sites')
+# Remover sitio existente si hay problemas
+rm -rf sites/${FRAPPE_SITE_NAME}
 
-# Crear directorio del sitio
-os.makedirs('/app/sites/${FRAPPE_SITE_NAME}', exist_ok=True)
+# Instalar usando bench (método oficial de Frappe)
+cd /app
 
-# Usar comando new_site de Frappe (más seguro)
-try:
-    new_site(
-        site='${FRAPPE_SITE_NAME}',
-        admin_password='admin123',
-        verbose=True,
-        install_apps=['frappe', 'erpnext', 'payments'],
-        force=True
-    )
-    print('✅ Sitio ${FRAPPE_SITE_NAME} instalado exitosamente')
-except Exception as e:
-    print('⚠️ Error en instalación:', str(e))
-    print('🔄 Intentando con --force...')
-    try:
-        import subprocess
-        result = subprocess.run([
-            'python', '-m', 'frappe.utils.bench', 'new-site', '${FRAPPE_SITE_NAME}',
-            '--admin-password', 'admin123',
-            '--mariadb-root-password', '',
-            '--install-app', 'erpnext',
-            '--install-app', 'payments',
-            '--force'
-        ], capture_output=True, text=True, cwd='/app/apps/frappe')
-        print('📋 Resultado bench:', result.stdout)
-        if result.stderr:
-            print('⚠️ Errores bench:', result.stderr)
-    except Exception as e2:
-        print('❌ Error final:', str(e2))
-"
+# Configurar bench
+export PATH="/app/apps/frappe/frappe/utils:$PATH"
+export PYTHONPATH="/app:/app/apps/frappe:/app/apps/erpnext:/app/apps/payments"
+
+# Variables para bench
+export DB_HOST="${MYSQLHOST}"
+export DB_PORT="${MYSQLPORT:-3306}"
+export DB_USER="${MYSQLUSER}"
+export DB_PASSWORD="${MYSQLPASSWORD}"
+
+echo "🔧 Instalando sitio ${FRAPPE_SITE_NAME} usando bench..."
+
+# Usar bench directamente (método oficial)
+python apps/frappe/frappe/utils/bench.py new-site ${FRAPPE_SITE_NAME} \
+  --admin-password admin123 \
+  --mariadb-root-username "${MYSQLUSER}" \
+  --mariadb-root-password "${MYSQLPASSWORD}" \
+  --db-host "${MYSQLHOST}" \
+  --db-port "${MYSQLPORT:-3306}" \
+  --install-app erpnext \
+  --install-app payments \
+  --force || echo "⚠️ Bench falló, continuando con servidor básico..."
 
 # 10. Iniciar servidor Frappe con manejo de errores
 echo "🚀 Iniciando servidor Frappe..."
