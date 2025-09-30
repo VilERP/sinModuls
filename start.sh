@@ -64,12 +64,11 @@ export PYTHONPATH="/app:/app/apps/frappe:/app/apps/erpnext:/app/apps/payments"
 export FRAPPE_SITE_NAME=${FRAPPE_SITE_NAME:-vilerp}
 cd /app
 
-# 9. Crear sitio inicial si no existe
-echo "🔍 Verificando si existe sitio sites/${FRAPPE_SITE_NAME}..."
+# 9. FORZAR creación/instalación del sitio (aunque el directorio exista)
+echo "🔍 Verificando estado del sitio sites/${FRAPPE_SITE_NAME}..."
 ls -la sites/ || echo "Directorio sites no existe aún"
 
-if [ ! -d "sites/${FRAPPE_SITE_NAME}" ]; then
-    echo "🏗️ Creando sitio inicial ${FRAPPE_SITE_NAME}..."
+echo "🏗️ Instalando/reinstalando sitio ${FRAPPE_SITE_NAME} (forzado)..."
     python -c "
 import frappe
 import os
@@ -90,14 +89,26 @@ try:
         install_apps=['frappe', 'erpnext', 'payments'],
         force=True
     )
-    print('✅ Sitio ${FRAPPE_SITE_NAME} creado exitosamente')
+    print('✅ Sitio ${FRAPPE_SITE_NAME} instalado exitosamente')
 except Exception as e:
-    print('⚠️ Sitio ya existe o error menor:', str(e))
-    print('✅ Continuando con sitio existente')
+    print('⚠️ Error en instalación:', str(e))
+    print('🔄 Intentando con --force...')
+    try:
+        import subprocess
+        result = subprocess.run([
+            'python', '-m', 'frappe.utils.bench', 'new-site', '${FRAPPE_SITE_NAME}',
+            '--admin-password', 'admin123',
+            '--mariadb-root-password', '',
+            '--install-app', 'erpnext',
+            '--install-app', 'payments',
+            '--force'
+        ], capture_output=True, text=True, cwd='/app/apps/frappe')
+        print('📋 Resultado bench:', result.stdout)
+        if result.stderr:
+            print('⚠️ Errores bench:', result.stderr)
+    except Exception as e2:
+        print('❌ Error final:', str(e2))
 "
-else
-    echo "✅ Sitio ${FRAPPE_SITE_NAME} ya existe"
-fi
 
 # 10. Iniciar servidor Frappe con manejo de errores
 echo "🚀 Iniciando servidor Frappe..."
