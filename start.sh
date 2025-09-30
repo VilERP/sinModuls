@@ -89,16 +89,50 @@ export DB_PASSWORD="${MYSQLPASSWORD}"
 
 echo "🔧 Instalando sitio ${FRAPPE_SITE_NAME} usando bench..."
 
-# Usar bench directamente (método oficial)
-python apps/frappe/frappe/utils/bench.py new-site ${FRAPPE_SITE_NAME} \
-  --admin-password admin123 \
-  --mariadb-root-username "${MYSQLUSER}" \
-  --mariadb-root-password "${MYSQLPASSWORD}" \
-  --db-host "${MYSQLHOST}" \
-  --db-port "${MYSQLPORT:-3306}" \
-  --install-app erpnext \
-  --install-app payments \
-  --force || echo "⚠️ Bench falló, continuando con servidor básico..."
+# Instalar sitio usando frappe directamente (sin bench)
+python -c "
+import os
+import sys
+sys.path.insert(0, '/app/apps/frappe')
+
+import frappe
+from frappe.installer import install_db
+
+# Configurar frappe para crear sitio
+frappe.init()
+
+site = '${FRAPPE_SITE_NAME}'
+admin_password = 'admin123'
+
+print('🔧 Creando base de datos para sitio:', site)
+
+try:
+    # Crear sitio con frappe installer
+    install_db(
+        root_login=os.environ.get('MYSQLUSER'),
+        root_password=os.environ.get('MYSQLPASSWORD'),
+        db_name=site,
+        admin_password=admin_password,
+        verbose=True,
+        source_sql=None,
+        force=True
+    )
+    print('✅ Sitio creado exitosamente')
+    
+    # Instalar apps
+    frappe.connect(site=site)
+    frappe.local.site = site
+    
+    from frappe.installer import install_app
+    install_app('erpnext', verbose=True)
+    install_app('payments', verbose=True)
+    
+    print('✅ Apps instaladas exitosamente')
+    
+except Exception as e:
+    print('⚠️ Error en instalación:', str(e))
+    print('✅ Continuando con sitio básico...')
+"
 
 # 10. Iniciar servidor Frappe con manejo de errores
 echo "🚀 Iniciando servidor Frappe..."
